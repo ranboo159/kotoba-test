@@ -289,12 +289,12 @@ function showIntro(){
   scr().innerHTML = `
     <div class="tag">VOCABULARY TEST — PROTOTYPE</div>
     <h1>ことばの力テスト</h1>
-    <p class="lead">所要時間はおよそ20〜35分です(下で「短縮版」を選ぶと約4割の時間)。<br>
+    <p class="lead">所要時間はおよそ5〜10分です。<br>
     とちゅうでブラウザを閉じたり、もどったりしないでください。<br>
     マウスでもキーボードでも回答できます(ボタンの <span class="kbd">1</span> などがキーの目印です)。</p>
     <ul style="font-size:13px;color:var(--sub);margin:0 0 18px 1.2em;">
       <li>調べものや辞書は使わず、いまの自分の力で答えてください。</li>
-      <li>パート1〜3を、じっくり考えてかまいません(直感で十分です)。</li>
+      <li>パート1・2を、じっくり考えてかまいません(直感で十分です)。</li>
       <li>結果は、入力したニックネーム・年齢とともに、研究のために記録・送信されます(ご同意のうえで進んでください)。</li>
     </ul>
     <div class="field"><label>なまえ(ニックネーム可)</label><input type="text" id="f-name" maxlength="20" placeholder="例: もりた"></div>
@@ -302,12 +302,7 @@ function showIntro(){
       <input type="number" id="f-age" min="5" max="120" inputmode="numeric" placeholder="例: 28"></div>
     <div class="field"><label>このテストを受けるのは…</label>
       <select id="f-session"><option value="1">1回目</option><option value="2">2回目</option><option value="3">3回目</option><option value="4">4回目</option><option value="5">5回目以降</option></select></div>
-    <div class="field"><label>テストの長さ</label>
-      <label style="font-weight:400;font-size:13px;color:var(--sub);display:flex;align-items:flex-start;gap:8px;cursor:pointer;line-height:1.5;">
-        <input type="checkbox" id="f-short" style="width:18px;height:18px;margin-top:2px;flex:none;">
-        <span><b>短縮版で受ける</b>(約4割の時間・タイピングなし)。「見たことがある」と「いみがわかる」の2つだけを測ります。ふだんは短縮、節目にフル、の使い分けも可(同じものさしです)。</span>
-      </label></div>
-    <p class="note">同じ なまえ で受けると、前に出た問題を避けて出題し、前回との比較も表示されます(この端末内に記録)。</p>
+    <p class="note">「見たことがある」と「いみがわかる」の2つを測ります(約5〜10分)。<br>同じ なまえ で受けると、前に出た問題を避けて出題し、前回との比較も表示されます(この端末内に記録)。</p>
     <div class="center" style="margin-top:22px;"><button class="btn" id="b-start">はじめる</button></div>
     <p class="note">※これは開発中のプロトタイプです。問題・結果の数値は調整中です。</p>`;
   setKeys({});   // この画面ではEnterで進めない(名前のIME確定Enterが誤発火するため。進むのは「はじめる」ボタンのみ)
@@ -318,12 +313,11 @@ function showIntro(){
     if(!name||!age){alert('なまえと年齢を入れてください');return;}
     if(isNaN(+age)||+age<5||+age>120){alert('年齢は数字で入れてください(例: 28)');return;}
     lk=true;
-    S.short = !!($('#f-short')&&$('#f-short').checked);
+    S.short = true;   // 短縮版のみで運用。フル版に戻すには f-short チェックボックスを復活し、この行を S.short=!!(...checked) に戻す
     S.meta={name,age:+age,session:+$('#f-session').value,short:S.short,ua:navigator.userAgent,ts:new Date().toISOString(),touch:('ontouchstart' in window)};
     S.form = S.meta.session===1 ? 'A':'B';
     guardOn=true;
-    if(S.short){ S.mode='typed'; showPartIntro(1); }   // 短縮版: じゅんび(タイピング練習)とP3を省略
-    else showTypingCheck();
+    S.mode='typed'; showPartIntro(1);   // 短縮版: じゅんび(タイピング練習)とP3(つかいこなせる)を省略
   };
   setTimeout(()=>{const f=$('#f-name'); if(f)f.focus();},50);
 }
