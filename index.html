@@ -287,24 +287,15 @@ const ynKeys=(ysel,nsel)=>({'1':()=>clickIf(ysel),'2':()=>clickIf(nsel),'f':()=>
 /* ===================== 画面: イントロ ===================== */
 function showIntro(){
   scr().innerHTML = `
-    <div class="tag">VOCABULARY TEST — PROTOTYPE</div>
-    <h1>ことばの力テスト</h1>
-    <p class="lead">所要時間はおよそ5〜10分です。<br>
-    とちゅうでブラウザを閉じたり、もどったりしないでください。<br>
-    マウスでもキーボードでも回答できます(ボタンの <span class="kbd">1</span> などがキーの目印です)。</p>
-    <ul style="font-size:13px;color:var(--sub);margin:0 0 18px 1.2em;">
-      <li>調べものや辞書は使わず、いまの自分の力で答えてください。</li>
-      <li>パート1・2を、じっくり考えてかまいません(直感で十分です)。</li>
-      <li>結果は、入力したニックネーム・年齢とともに、研究のために記録・送信されます(ご同意のうえで進んでください)。</li>
-    </ul>
+    <h1 style="margin-bottom:8px;">ことばの力テスト</h1>
+    <p class="lead">ことばを見て、知っているかどうかを答えます。<b>5〜10分・全2パート</b>。<br>調べずに、いまの自分の力で答えてください。</p>
     <div class="field"><label>なまえ(ニックネーム可)</label><input type="text" id="f-name" maxlength="20" placeholder="例: もりた"></div>
     <div class="field"><label>年齢(歳)</label>
       <input type="number" id="f-age" min="5" max="120" inputmode="numeric" placeholder="例: 28"></div>
     <div class="field"><label>このテストを受けるのは…</label>
       <select id="f-session"><option value="1">1回目</option><option value="2">2回目</option><option value="3">3回目</option><option value="4">4回目</option><option value="5">5回目以降</option></select></div>
-    <p class="note">「見たことがある」と「いみがわかる」の2つを測ります(約5〜10分)。<br>同じ なまえ で受けると、前に出た問題を避けて出題し、前回との比較も表示されます(この端末内に記録)。</p>
-    <div class="center" style="margin-top:22px;"><button class="btn" id="b-start">はじめる</button></div>
-    <p class="note">※これは開発中のプロトタイプです。問題・結果の数値は調整中です。</p>`;
+    <div class="center" style="margin-top:24px;"><button class="btn" id="b-start">はじめる</button></div>
+    <p class="note">結果はニックネーム・年齢とともに記録されます。途中でとじたり戻ったりしないでください。</p>`;
   setKeys({});   // この画面ではEnterで進めない(名前のIME確定Enterが誤発火するため。進むのは「はじめる」ボタンのみ)
   let lk=false;
   $('#b-start').onclick=()=>{
@@ -384,8 +375,8 @@ function showTypingCheck(){
 
 /* ===================== パート進行 ===================== */
 const PARTS={
-  1:{title:'パート1 ことばさがし', desc:`ことばが1つずつ出てきます。そのことばを<b>これまでに見たことがある</b>(本や文章の中で見かけた覚えがある)なら「見たことがある」、見た覚えがないなら「ない・わからない」を選んでください。意味が言えなくても、見覚えがあれば「ある」でOKです。<br><br>⚠️ 中には<b>実際には存在しない「にせもののことば」</b>(にせの熟語・にせのカタカナ語も)がまざっています。知ったかぶりはせず、正直に答えるのがいちばん正確な結果になります。<br><br>じっくり考えるより、<b>見た瞬間の直感</b>で答えてOKです。`},
-  2:{title:'パート2 いみたしかめ', desc:`ことばと、その<b>意味の説明が1つずつ</b>出てきます。説明が合っていれば「はい」、ちがうと思えば「ちがう」を選んでください。<br><br>説明がいくつ出てくるかは、ことばによって変わります。<b>一度「ちがう」と答えた説明にはもどれません</b>。考えくらべて消去法で選ぶことはできない形式です — 知っているかどうか、そのものでお答えください。`},
+  1:{title:'パート1 ことばさがし', desc:`ことばを<b>見たことがある</b>か答えます。見覚えがあれば「見たことがある」、なければ「ない・わからない」。<br>⚠️ <b>にせものの言葉</b>もまざっています。正直に、直感でどうぞ。`},
+  2:{title:'パート2 いみたしかめ', desc:`ことばの<b>意味の説明</b>が出ます。合っていれば「はい」、ちがえば「ちがう」。<br>⚠️ 一度「ちがう」と答えると<b>もどれません</b>。`},
   3:{title:'パート3 つかいこなし', desc:`文に合うことばを<b>自分で思い出して、ひらがなで入力</b>する問題です(最初の1文字と文字数が手がかり。ローマ字打ち)。<br>正解するほど、どんどん難しいことばになっていきます。<br>思い出せないときは「わからない」ボタンでOKです。`},
 };
 function showPartIntro(p){
@@ -876,50 +867,42 @@ function showReport(){
   scr().innerHTML=`
     <div class="tag">RESULT — ことばの力レポート(プロトタイプ)</div>
     <h1 style="margin-bottom:2px;">${S.meta.name} さんの結果</h1>
-    <p class="note" style="margin:0 0 18px;">受検日 ${new Date().toLocaleDateString('ja-JP')} / ${S.meta.session}回目 / ${S.meta.age}歳${S.meta.short? ' / <b>短縮版(2層)</b>': ''}</p>
+    <p class="note" style="margin:0 0 18px;">受検日 ${new Date().toLocaleDateString('ja-JP')} / ${S.meta.session}回目 / ${S.meta.age}歳</p>
 
     <div class="rep-name">いみがわかることば(今回の記録)</div>
     <div class="rep-big">${e.ceilB? fmtN(e.VB)+'<small> 語以上</small>' : '約 '+fmtN(e.VB)+'<small> 語</small>'}</div>
     ${e.ceilB? `<p class="note" style="color:var(--ng);font-weight:700;">⚠ 測定不能域 — あなたの「いみがわかる」は、このテストで測れる上限を超えています。表示は下限値です(問題バンク拡張版で測り直し対象)。</p>`:''}
-    <div class="rep-ci">95%区間 ${fmtN(e.VB_lo)} 〜 ${fmtN(e.VB_hi)}語(基準リスト ${DATA.daicho.total.toLocaleString()}語中・うち複合語 ${(DATA.daicho.compounds||0).toLocaleString()}語)</div>
+    <div class="rep-ci">95%のあたり ${fmtN(e.VB_lo)} 〜 ${fmtN(e.VB_hi)}語</div>
     ${S.prevResult? `<p class="note" style="margin-top:8px;">前回(${(S.prevResult.ts||'').slice(5,10).replace('-','/')}・${S.prevResult.session}回目): 約${S.prevResult.VB.toLocaleString()}語 → 今回 ${(Math.round(e.VB)-S.prevResult.VB)>=0?'+':''}${(Math.round(e.VB)-S.prevResult.VB).toLocaleString()}語。<b>差が95%幅の中なら誤差の範囲</b>として見てください。</p>`:''}
     ${e.cumN>=2? `<p class="note">これまでの総合推定(${e.cumN}回の重み付き平均): <b>約 ${fmtN(e.VBcum)}語</b>(${fmtN(e.VBcum_lo)}〜${fmtN(e.VBcum_hi)})— 回数を重ねるほど この幅は締まります。</p>`:''}
 
     <hr class="secline">
-    <div class="tag">3つの層</div>
+    <div class="tag">${e.VA==null?'ことばの2つの層':'3つの層'}</div>
     <div class="tierrow"><div class="tname">みたことがある<small>見覚えがある</small></div>
       <div><div class="tbar" style="width:100%;background:var(--c);">${e.ceilC? fmtN(e.VC)+'語以上':'約 '+fmtN(e.VC)+'語'}</div></div>
       <div class="tnum">${e.ceilC? '<span class="badge" style="background:var(--ng);color:#fff;">測定上限超え</span>':`<span class="badge est">予測</span> ${fmtN(e.VC_lo)}〜${fmtN(e.VC_hi)}`}</div></div>
     <div class="tierrow"><div class="tname">いみがわかる<small>意味を選べる</small></div>
       <div><div class="tbar" style="width:${wB}%;background:var(--main);">${e.ceilB? fmtN(e.VB)+'語以上':'約 '+fmtN(e.VB)+'語'}</div></div>
       <div class="tnum">${e.ceilB? '<span class="badge" style="background:var(--ng);color:#fff;">測定上限超え</span>':`<span class="badge rec">記録</span> ${fmtN(e.VB_lo)}〜${fmtN(e.VB_hi)}`}</div></div>
-    <div class="tierrow"><div class="tname">つかいこなせる<small>自力で使える</small></div>
-      <div><div class="tbar" style="width:${e.VA==null?8:wA}%;background:${e.VA==null?'#c3c6cc':'var(--a)'};">${e.VA==null? '— 未測定' : (e.ceilA? fmtN(e.VA)+'語以上':'約 '+fmtN(e.VA)+'語')}</div></div>
-      <div class="tnum">${e.VA==null? '<span class="badge est">短縮版では測定なし</span>' : (e.ceilA? '<span class="badge" style="background:var(--ng);color:#fff;">測定上限超え</span>':`<span class="badge est">予測</span> ${fmtN(e.VA_lo)}〜${fmtN(e.VA_hi)}`)}</div></div>
+    ${e.VA==null ? '' : `<div class="tierrow"><div class="tname">つかいこなせる<small>自力で使える</small></div>
+      <div><div class="tbar" style="width:${wA}%;background:var(--a);">${e.ceilA? fmtN(e.VA)+'語以上':'約 '+fmtN(e.VA)+'語'}</div></div>
+      <div class="tnum">${e.ceilA? '<span class="badge" style="background:var(--ng);color:#fff;">測定上限超え</span>':`<span class="badge est">予測</span> ${fmtN(e.VA_lo)}〜${fmtN(e.VA_hi)}`}</div></div>`}
 
+    ${e.short ? '' : `
     <hr class="secline">
     <div class="tag">ことばのかたち(参考指標・検証中)</div>
-    ${e.short? `<p class="lead" style="font-size:14px;color:var(--sub);">短縮版では「かたち(C:B:A)」は出ません(つかいこなせる=A を測っていないため)。フル版で受けると、A を含めた3層のかたちが見られます。</p>` : (e.ceilC||e.ceilB||e.ceilA)? `<p class="lead" style="font-size:14px;color:var(--ng);"><b>算出不能</b> — 測定上限を超えた層があるため、かたち(比率)は計算できません。バンク拡張版での測り直し対象です。</p>` : `
+    ${(e.ceilC||e.ceilB||e.ceilA)? `<p class="lead" style="font-size:14px;color:var(--ng);"><b>算出不能</b> — 測定上限を超えた層があります。</p>` : `
     <p class="lead" style="font-size:15px;"><b style="color:var(--main);">${e.label}</b></p>
     <div class="gaps">
-      <div class="gap"><div class="g1">みたことがある ÷ いみがわかる</div><div class="g2">${e.r1.toFixed(2)}<span style="font-size:11px;">倍</span></div><div class="g1">出会いの先行度(全語彙)</div></div>
-      <div class="gap"><div class="g1">いみがわかる ÷ つかいこなせる</div><div class="g2">${e.r2.toFixed(2)}<span style="font-size:11px;">倍</span></div><div class="g1">使いこなしへの伸びしろ(全語彙)</div></div>
-    </div>
-    <div class="gaps">
-      <div class="gap" style="background:var(--main-weak);"><div class="g1"><b>むずかしい語だけ</b>で見ると(あなたの最前線の帯)</div>
-      <div class="g2" style="font-size:17px;">C ${fmtN(e.hC)} : B ${fmtN(e.hB)} : A ${fmtN(e.hA)}<span style="font-size:11px;font-weight:400;color:var(--faint)"> (${e.hr1.toFixed(1)}倍 / ${e.hr2.toFixed(1)}倍)</span></div>
-      <div class="g1">かんたんな語は3層とも全部知っているため、全語彙の比は1に近づきます。ピラミッドの傾斜は この難語帯に現れます</div></div>
+      <div class="gap"><div class="g1">みた ÷ いみ</div><div class="g2">${e.r1.toFixed(2)}<span style="font-size:11px;">倍</span></div></div>
+      <div class="gap"><div class="g1">いみ ÷ つかう</div><div class="g2">${e.r2.toFixed(2)}<span style="font-size:11px;">倍</span></div></div>
     </div>`}
-    <p class="note">※「かたち」は誤差を含む検証中の指標です。大きな傾向としてご覧ください。研究の相場では、語彙全体の比はおおよそ <b>C:B:A = 3:2:1</b>(ただし「出会いの最前線」の難語帯に限れば C:A は10:1まで開くことが実証されています)。なお本テストの基準リストは複合語を含むため、<b>Cは相場より大きめに出るのが正常</b>です(複合語は見覚えはあるが、1語ずつ意味を問う対象にはならないため)。</p>
+    <p class="note">※「かたち」は検証中の参考指標です(研究の相場 C:B:A ≒ 3:2:1)。</p>`}
 
     <hr class="secline">
-    <div class="tag">回答の確からしさ</div>
-    <div class="quality">
-      <span>${fastFlag}(にせ単語反応率 ${(e.g*100).toFixed(0)}%)</span>
-      <span>入力方式: ${S.mode==='typed'?'キーボード':'ボタン'}</span>
-      <span>素点: さがし 実語${S.p1.filter(x=>x.real&&x.resp).length}/${S.p1.filter(x=>x.real).length}・偽語誤反応${S.p1.filter(x=>!x.real&&x.resp).length}/${S.p1.filter(x=>!x.real).length} / いみ ${S.p2.filter(x=>x.correct).length}/${S.p2.length}${S.p3.some(x=>x.type==='recall')? ' / 想起 '+S.p3.filter(x=>x.type==='recall'&&x.status==='correct').length+'/'+S.p3.filter(x=>x.type==='recall').length : ''}</span>
-      ${(e.ceilC||e.ceilB||e.ceilA)?'<span style="color:var(--ng)">⚠ 測定上限を超えた層があります(該当層は「◯語以上」と表示)</span>':''}
-      ${e.reversal?'<span style="color:var(--ng)">△ 層の順序に逆転(開発ログに記録)</span>':''}
+    <div class="quality" style="color:var(--faint);">
+      <span>${fastFlag}</span>
+      <span>素点 みた ${S.p1.filter(x=>x.real&&x.resp).length}/${S.p1.filter(x=>x.real).length} ・ いみ ${S.p2.filter(x=>x.correct).length}/${S.p2.length}</span>
     </div>
 
     <div class="center" style="margin-top:26px;">
@@ -930,7 +913,7 @@ function showReport(){
     <p class="note center" id="submit-status" style="margin-top:10px;min-height:18px;"></p>
 
     <details><summary>開発用の詳細データ</summary><pre id="devjson"></pre></details>
-    <p class="note">語彙数は、基準リスト(分類語彙表ベースの内容語 ${DATA.daicho.total.toLocaleString()}語)のうち各層の基準を満たすと推定される語数です(項目反応理論による区間つき推定値・絶対値ではありません)。プロトタイプのため数値は較正前です。</p>`;
+    <p class="note">語彙数は基準リスト(${DATA.daicho.total.toLocaleString()}語)にもとづく推定値です。プロトタイプのため較正前の暫定値です。</p>`;
   const dump={meta:S.meta, form:S.form, mode:S.mode, baselineRT:S.baselineRT, typingMs:S.typingMs,
               partDur:S.partDur, est:S.est, p1:S.p1, p2:S.p2, p3:S.p3, p4:S.p4, bankVersion:DATA.version};
   $('#devjson').textContent=JSON.stringify({est:S.est, partDur:S.partDur, condN:S.est.condN},null,1);
