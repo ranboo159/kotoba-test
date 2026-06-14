@@ -112,7 +112,7 @@ const GRID = []; for(let t=-5;t<=5.0001;t+=0.1) GRID.push(+t.toFixed(2));
 /* ===== 結果の自動送信(任意) =====
    SUBMIT_URL に Google Apps Script のウェブアプリURLを入れると、受検結果が自分のスプレッドシートに自動でたまります。
    空のままなら送信せず、従来どおり「結果データを保存(JSON)」ボタンのみで運用します。 */
-const SUBMIT_URL = '';
+const SUBMIT_URL = 'https://script.google.com/macros/s/AKfycbwu00Ug34dl9RgJ9t3cOKCkygbIP4hAhdjyw_c7hM_VCR6JhOKNE36CpAUxAJtWkm76yQ/exec';
 const SUBMIT_TOKEN = 'kotoba2026';
 
 function normPrior(grid, mu, sd){ return grid.map(t=>Math.exp(-0.5*((t-mu)/sd)**2)); }
