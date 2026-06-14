@@ -864,6 +864,12 @@ function showReport(){
   const e=S.est;
   const wB=Math.max(8,e.VB/e.VC*100), wA=e.VA? Math.max(6,e.VA/e.VC*100):0;
   const fastFlag = e.g<=0.15 ? '✓ にせ単語チェック: 通過' : '△ にせ単語への反応がやや多め(慎重に解釈)';
+  // 「潜在(見た) vs 顕在(意味)」: 見た語のうち意味がわかる割合と、伸びしろ(C−B)
+  const pct = e.VC>0 ? Math.min(100, Math.round(e.VB/e.VC*100)) : 0;
+  const headroom = Math.max(0, Math.round(e.VC - e.VB));
+  const headroomTxt = headroom < e.VC*0.02
+    ? '見たことばの意味は、ほぼ把握できています(伸びしろはわずか)'
+    : '意味がまだ定着していないことば(伸びしろ)＝ 約 '+fmtN(headroom)+'語 ← 次に増やせる層';
   scr().innerHTML=`
     <div class="tag">RESULT — ことばの力レポート(プロトタイプ)</div>
     <h1 style="margin-bottom:2px;">${S.meta.name} さんの結果</h1>
@@ -887,6 +893,14 @@ function showReport(){
     ${e.VA==null ? '' : `<div class="tierrow"><div class="tname">つかいこなせる<small>自力で使える</small></div>
       <div><div class="tbar" style="width:${wA}%;background:var(--a);">${e.ceilA? fmtN(e.VA)+'語以上':'約 '+fmtN(e.VA)+'語'}</div></div>
       <div class="tnum">${e.ceilA? '<span class="badge" style="background:var(--ng);color:#fff;">測定上限超え</span>':`<span class="badge est">予測</span> ${fmtN(e.VA_lo)}〜${fmtN(e.VA_hi)}`}</div></div>`}
+
+    <hr class="secline">
+    <div class="tag">見たことば と 意味がわかることば</div>
+    <div class="gaps"><div class="gap" style="background:var(--main-weak);">
+      <div class="g1">「見たことがある」ことばのうち</div>
+      <div class="g2" style="color:var(--main);">${pct}<span style="font-size:14px;font-weight:400;">％ は意味もわかる</span></div>
+      <div class="g1">${headroomTxt}</div>
+    </div></div>
 
     ${e.short ? '' : `
     <hr class="secline">
