@@ -569,7 +569,7 @@ function startP2(){
   const fresh=pool.filter(x=>!usedP2.has(x.w));
   p2Pool=(fresh.length>=30? fresh : pool).map(x=>({...x,used:false}));
   p2T0=now();
-  p2Est={c: e1.c-0.3, se:2};   // P1の力から開始(易問の沼へ落ちないよう浅めのオフセット)
+  p2Est={c: e1.c-0.5, se:2};   // 意味は見たより低い→「見た−0.5」から開始(出だしを下げる)
   p2Next();
 }
 /* 同義の定義文を持つ語クラスタ: 同一セッションで両方は出さない(相互ヒント防止) */
@@ -582,7 +582,7 @@ function p2Select(){
   for(const g of SYN_GROUPS){ if(g.some(w=>shown.has(w))) g.forEach(w=>banned.add(w)); }
   const cand=p2Pool.filter(x=>!x.used && !banned.has(x.w));
   if(!cand.length) return null;
-  const target=p2Est.c+0.3;
+  const target=p2Est.c+0.1;   // 実力ちょうど寄り(以前の+0.3=やや難しめを是正)
   cand.sort((a,b)=>Math.abs(a.b-target)-Math.abs(b.b-target));
   const top=cand.slice(0,Math.min(3,cand.length));
   return top[Math.floor(Math.random()*top.length)];
@@ -603,7 +603,7 @@ function p2Next(){
   let pos=0, dead=false;
   const record=(correct)=>{
     S.p2.push({w:it.w,b:+it.b.toFixed(2),linked:!!it.linked,correct:correct&&!dead,nOpt:seq.length,seen:pos+1,rt:Math.round(now()-t0)});
-    const est=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:P2_FLOOR,slip:P2_SLIP})), (S.est._p1quick&&S.est._p1quick.c)||0, 0.8);
+    const est=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:P2_FLOOR,slip:P2_SLIP})), ((S.est._p1quick&&S.est._p1quick.c)||0)-0.5, 0.8);  // 錨を「見た−0.5」に(意味<見たを反映し見た高さへ引き戻されない)
     p2Est.c=est.c; p2Est.se=est.se;
     p2Next();
   };
