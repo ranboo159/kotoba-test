@@ -582,7 +582,7 @@ function p2Select(){
   for(const g of SYN_GROUPS){ if(g.some(w=>shown.has(w))) g.forEach(w=>banned.add(w)); }
   const cand=p2Pool.filter(x=>!x.used && !banned.has(x.w));
   if(!cand.length) return null;
-  const target=p2Est.c;   // 実力ちょうど(+0.1の上げ底を撤去=失敗時にしっかり易問へ降りる)
+  const target=p2Est.c-0.15;   // 実力よりわずかに易しめ(「ずっと難しい」体感の是正)
   cand.sort((a,b)=>Math.abs(a.b-target)-Math.abs(b.b-target));
   const top=cand.slice(0,Math.min(3,cand.length));
   return top[Math.floor(Math.random()*top.length)];
@@ -603,7 +603,7 @@ function p2Next(){
   let pos=0, dead=false;
   const record=(correct)=>{
     S.p2.push({w:it.w,b:+it.b.toFixed(2),linked:!!it.linked,correct:correct&&!dead,nOpt:seq.length,seen:pos+1,rt:Math.round(now()-t0)});
-    const est=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:P2_FLOOR,slip:P2_SLIP})), ((S.est._p1quick&&S.est._p1quick.c)||0)-0.7, 1.3);  // 出題用の生推定: 錨をゆるめ(sd1.3)失敗時に易問へ降下(最終スコアは別途eC錨で頭打ち)
+    const est=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:1/Math.max(2,x.nOpt||3),slip:P2_SLIP})), ((S.est._p1quick&&S.est._p1quick.c)||0)-0.7, 1.3);  // floor=当てずっぽう率(1/選択肢数)で2択正解の過大評価を防止→暴騰せず実力付近を出題
     p2Est.c=est.c; p2Est.se=est.se;
     p2Next();
   };
@@ -748,7 +748,7 @@ function finish(){
     const eC=eapP1(S.p1, 0.5, 1.5);
     // B層(独立prior — 傾き測定のため事前で結びつけない)
     // B層: SMC(floor 0.10)のみ
-    const eB=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:0.10,slip:P2_SLIP})), eC.c, 0.5);  // slip吸収+C層を錨(sd0.5)。Bは下でB≤Cに頭打ち
+    const eB=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:1/Math.max(2,x.nOpt||3),slip:P2_SLIP})), eC.c, 0.5);  // floor=当てずっぽう率(1/選択肢数)で当て勘正解の過大評価を抑制。C層を錨(sd0.5)・Bは下でB≤Cに頭打ち
     // A層: 想起のみ(推測の余地なし)。unmatched/skipは誤答扱い、unmatchedは要レビューとして記録
     const aItems=S.p3.filter(x=>x.type==='recall').map(x=>({b:x.b, correct:x.status==='correct', floor:0}));
     const hasA = aItems.length>0;                          // 短縮版はA(つかいこなせる)を測らない
