@@ -569,7 +569,7 @@ function startP2(){
   const fresh=pool.filter(x=>!usedP2.has(x.w));
   p2Pool=(fresh.length>=30? fresh : pool).map(x=>({...x,used:false}));
   p2T0=now();
-  p2Est={c: e1.c-0.5, se:2};   // 意味は見たより低い→「見た−0.5」から開始(出だしを下げる)
+  p2Est={c: e1.c-0.7, se:2};   // 意味は見たより低い→「見た−0.7」から開始(出だしをさらに下げる)
   p2Next();
 }
 /* 同義の定義文を持つ語クラスタ: 同一セッションで両方は出さない(相互ヒント防止) */
@@ -582,7 +582,7 @@ function p2Select(){
   for(const g of SYN_GROUPS){ if(g.some(w=>shown.has(w))) g.forEach(w=>banned.add(w)); }
   const cand=p2Pool.filter(x=>!x.used && !banned.has(x.w));
   if(!cand.length) return null;
-  const target=p2Est.c+0.1;   // 実力ちょうど寄り(以前の+0.3=やや難しめを是正)
+  const target=p2Est.c;   // 実力ちょうど(+0.1の上げ底を撤去=失敗時にしっかり易問へ降りる)
   cand.sort((a,b)=>Math.abs(a.b-target)-Math.abs(b.b-target));
   const top=cand.slice(0,Math.min(3,cand.length));
   return top[Math.floor(Math.random()*top.length)];
@@ -603,7 +603,7 @@ function p2Next(){
   let pos=0, dead=false;
   const record=(correct)=>{
     S.p2.push({w:it.w,b:+it.b.toFixed(2),linked:!!it.linked,correct:correct&&!dead,nOpt:seq.length,seen:pos+1,rt:Math.round(now()-t0)});
-    const est=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:P2_FLOOR,slip:P2_SLIP})), ((S.est._p1quick&&S.est._p1quick.c)||0)-0.5, 0.8);  // 錨を「見た−0.5」に(意味<見たを反映し見た高さへ引き戻されない)
+    const est=eap1d(S.p2.map(x=>({b:x.b,correct:x.correct,floor:P2_FLOOR,slip:P2_SLIP})), ((S.est._p1quick&&S.est._p1quick.c)||0)-0.7, 1.3);  // 出題用の生推定: 錨をゆるめ(sd1.3)失敗時に易問へ降下(最終スコアは別途eC錨で頭打ち)
     p2Est.c=est.c; p2Est.se=est.se;
     p2Next();
   };
@@ -616,7 +616,7 @@ function p2Next(){
       <div class="stim small">${it.w}</div>
       <p class="lead center">この ことばの意味は……</p>
       <div class="opts" style="max-width:520px;"><div class="opt" style="cursor:default;border-color:var(--main);background:var(--soft);">${it.opts[oi]}</div></div>
-      <div class="yn" style="margin-top:20px;"><button class="btn big" id="y">はい、この意味 ${kbd('1')}</button><button class="btn big ghost" id="n">ちがう ${kbd('2')}</button></div>`;
+      <div class="yn" style="margin-top:20px;"><button class="btn big" id="y">はい、この意味 ${kbd('1')}</button><button class="btn big ghost" id="n">いいえ・わからない ${kbd('2')}</button></div>`;
     setKeys(ynKeys('#y','#n'));
     let lk=false;
     const respond=yes=>{
@@ -800,6 +800,11 @@ function finish(){
     est.ceilA = hasA? (eA.c > maxB3-0.3) : false;
     est.ceiling = est.ceilC || est.ceilB;
     est.lapse=P1_LAPSE; est.fastN=S.p1.filter(x=>x.fast).length;
+    // 回答の妥当性チェック: 速すぎ(きちんと読まず連打) or にせ単語に「ある」が多すぎ(でたらめ回答) → 無効扱い
+    const _fk=S.p1.filter(x=>!x.real);
+    est.faRate = _fk.length ? +(_fk.filter(x=>x.resp).length/_fk.length).toFixed(3) : 0;
+    est.fastFrac = S.p1.length ? +(est.fastN/S.p1.length).toFixed(3) : 0;
+    est.invalid = (est.fastFrac>0.30) || (est.faRate>0.5);
     S.est=est;
     // 履歴の保存(出題済み項目の記録+前回比)
     const h=loadHist();
@@ -862,6 +867,20 @@ function normBlock(){
 }
 function showReport(){
   const e=S.est;
+  if(e.invalid){
+    const reason = e.fastFrac>0.30 ? '回答がはやすぎます(ことばをよく見ずに押している可能性があります)' : 'にせ単語(じつざいしないことば)に「見たことがある」と答えすぎです';
+    scr().innerHTML=`
+      <div class="tag">RESULT</div>
+      <h1 style="color:var(--ng);">正しく測定できませんでした</h1>
+      <p class="lead" style="margin:14px 0;">${reason}。<br>このテストは、<b>知らないことばには正直に「ない・わからない」</b>を選び、<b>ことばをよく見て</b>答えると、正しく測れます。</p>
+      <p class="note">落ち着いて、もう一度受けてみてください。</p>
+      <div class="center" style="margin-top:24px;"><button class="btn" id="b-redo">もう一度受ける</button></div>
+      <p class="note center" id="submit-status" style="margin-top:10px;min-height:18px;"></p>`;
+    $('#b-redo').onclick=()=>location.reload();
+    const dump={meta:S.meta, form:S.form, mode:S.mode, baselineRT:S.baselineRT, typingMs:S.typingMs, partDur:S.partDur, est:S.est, p1:S.p1, p2:S.p2, p3:S.p3, p4:S.p4, bankVersion:DATA.version};
+    if(SUBMIT_URL){ const sst=$('#submit-status'); fetch(SUBMIT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SUBMIT_TOKEN,data:dump})}).then(()=>{if(sst)sst.textContent='(この結果は無効として記録されました)';}).catch(()=>{}); }
+    setKeys({}); return;
+  }
   const wB=Math.max(8,e.VB/e.VC*100), wA=e.VA? Math.max(6,e.VA/e.VC*100):0;
   const fastFlag = e.g<=0.15 ? '✓ にせ単語チェック: 通過' : '△ にせ単語への反応がやや多め(慎重に解釈)';
   // 「潜在(見た) vs 顕在(意味)」: 見た語のうち意味がわかる割合と、伸びしろ(C−B)
