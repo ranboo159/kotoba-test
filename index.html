@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ことばの力テスト(プロトタイプ)</title>
+<title>ことばの力テスト</title>
+<meta name="description" content="ことばを見て、知っているかを答える語彙のテスト。5〜10分で受けられます。">
+<meta property="og:title" content="ことばの力テスト">
+<meta property="og:description" content="ことばを見て、知っているかを答える語彙のテスト。5〜10分で受けられます。">
+<meta property="og:type" content="website">
 <style>
   :root{
     --ink:#1c2430; --sub:#5a6472; --faint:#8b94a3;
@@ -98,7 +102,6 @@
 </style>
 </head>
 <body>
-<div class="mockband">PROTOTYPE v1.2</div>
 <div class="wrap"><div class="card" id="screen"></div></div>
 
 <script>
@@ -890,7 +893,7 @@ function showReport(){
     ? '見たことばの意味は、ほぼ把握できています(伸びしろはわずか)'
     : '意味がまだ定着していないことば(伸びしろ)＝ 約 '+fmtN(headroom)+'語 ← 次に増やせる層';
   scr().innerHTML=`
-    <div class="tag">RESULT — ことばの力レポート(プロトタイプ)</div>
+    <div class="tag">RESULT — ことばの力レポート</div>
     <h1 style="margin-bottom:2px;">${S.meta.name} さんの結果</h1>
     <p class="note" style="margin:0 0 18px;">受検日 ${new Date().toLocaleDateString('ja-JP')} / ${S.meta.session}回目 / ${S.meta.age}歳</p>
 
@@ -946,7 +949,7 @@ function showReport(){
     <p class="note center" id="submit-status" style="margin-top:10px;min-height:18px;"></p>
 
     <details><summary>開発用の詳細データ</summary><pre id="devjson"></pre></details>
-    <p class="note">語彙数は基準リスト(${DATA.daicho.total.toLocaleString()}語)にもとづく推定値です。プロトタイプのため較正前の暫定値です。</p>`;
+    <p class="note">語彙数は基準リスト(${DATA.daicho.total.toLocaleString()}語)にもとづく推定値です。現在データを集めて精度を高めている最中のため、数値は目安としてご覧ください。</p>`;
   const dump={meta:S.meta, form:S.form, mode:S.mode, baselineRT:S.baselineRT, typingMs:S.typingMs,
               partDur:S.partDur, est:S.est, p1:S.p1, p2:S.p2, p3:S.p3, p4:S.p4, bankVersion:DATA.version};
   $('#devjson').textContent=JSON.stringify({est:S.est, partDur:S.partDur, condN:S.est.condN},null,1);
